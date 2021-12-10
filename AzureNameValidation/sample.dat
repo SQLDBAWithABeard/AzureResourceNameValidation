@@ -1,3 +1,4 @@
 {
-    "name": "Azure"
+    "name": "Azure",
+    "NameSpace": "Microsoft.AnalysisServices/servers"
 }

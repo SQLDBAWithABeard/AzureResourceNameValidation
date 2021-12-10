@@ -1,0 +1,16 @@
+{
+    "bindings": [{
+            "name": "Timer",
+            "type": "timerTrigger",
+            "direction": "in",
+            "schedule": "0 * * * * *"
+        },
+        {
+            "name": "outputBlob",
+            "type": "blob",
+            "path": "data/restrictions.json",
+            "connection": "resourcerestrictions_STORAGE",
+            "direction": "out"
+        }
+    ]
+}
