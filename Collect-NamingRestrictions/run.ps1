@@ -12,13 +12,12 @@
 #>
 param($Timer)
 
-if(-not (Get-Module PowerHTML -ErrorAction SilentlyContinue)){
-    Write-Debug "Installing Module"
-    Install-Module PowerHTML -Scope CurrentUser
-}
+# Write to the Azure Functions log stream.
+$Message = "PowerShell HTTP trigger function processed a request. {0}" -f ($Request.body | Out-String)
+Write-Host $Message
 function Get-AzNamingRestrictions {
-[cmdletbinding()]
-Param ()
+    [cmdletbinding()]
+    Param ()
     # This will get the naming restrictions from the Microsoft Docs page and output s
 
     # requires PowerHTML module 
@@ -27,9 +26,23 @@ Param ()
     # @ba4bes
     # 4bes.nl
 
-    Write-Debug "Calling the URL and converting"
+    Write-Output "Calling the URL and converting"
     $URL = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules'
-    $SourceContent = ConvertFrom-Html -URI $URL
+    try {
+        $SourceContent = ConvertFrom-Html -URI $URL -ErrorAction Stop
+    }
+    catch {
+        Write-Output "Something went wrong"
+        $HttpResult = [HttpStatusCode]::BadRequest
+        $Body = "The Beard is sad, Something went wrong - {0}" -f $_ 
+
+        Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+                StatusCode = $HttpResult
+                Body       = $body
+            })
+        break    
+    }
+    
 
     Write-Debug "Got the details from the URL"
     # we need to find the tables with the info
@@ -50,7 +63,7 @@ Param ()
                         [PSCustomObject]@{
                             Header          = $header
                             Entity          = $ChildNoteArray[0] 
-                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                             Scope           = $ChildNoteArray[1]
                             MinLength       = 7
                             MaxLength       = 7
@@ -62,7 +75,7 @@ Param ()
                         [PSCustomObject]@{
                             Header          = $header
                             Entity          = $ChildNoteArray[0]
-                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                             Scope           = $ChildNoteArray[1]
                             MinLength       = 8
                             MaxLength       = 8
@@ -74,7 +87,7 @@ Param ()
                         [PSCustomObject]@{
                             Header          = $header
                             Entity          = $ChildNoteArray[0]
-                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                             Scope           = $ChildNoteArray[1]
                             MinLength       = 15
                             MaxLength       = 15
@@ -89,19 +102,19 @@ Param ()
                                 [PSCustomObject]@{
                                     Header          = $header
                                     Entity          = $ChildNoteArray[0]
-                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                                     Scope           = $ChildNoteArray[1]
                                     MinLength       = 7
                                     MaxLength       = 7
                                     ValidCharacters = 'Must be Default'
                                     MustContain     = 'Default'
                                 }
-                             }
-                             'settings' {
+                            }
+                            'settings' {
                                 [PSCustomObject]@{
                                     Header          = $header
                                     Entity          = $ChildNoteArray[0]
-                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                                     Scope           = $ChildNoteArray[1]
                                     MinLength       = 4
                                     MaxLength       = 34
@@ -113,7 +126,7 @@ Param ()
                                 [PSCustomObject]@{
                                     Header          = $header
                                     Entity          = $ChildNoteArray[0]
-                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                                     Scope           = $ChildNoteArray[1]
                                     MinLength       = 5
                                     MaxLength       = 9
@@ -125,7 +138,7 @@ Param ()
                                 [PSCustomObject]@{
                                     Header          = $header
                                     Entity          = $ChildNoteArray[0]
-                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                                     Scope           = $ChildNoteArray[1]
                                     MinLength       = 7
                                     MaxLength       = 7
@@ -137,7 +150,7 @@ Param ()
                                 [PSCustomObject]@{
                                     Header          = $header
                                     Entity          = $ChildNoteArray[0]
-                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                                    NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                                     Scope           = $ChildNoteArray[1]
                                     MinLength       = 0
                                     MaxLength       = 150
@@ -154,7 +167,7 @@ Param ()
                             Header          = $header
                             Entity          = $ChildNoteArray[0]
                             Scope           = $ChildNoteArray[1]
-                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                             MinLength       = $ChildNoteArray[2].Split('-')[0]
                             MaxLength       = $ChildNoteArray[2].Split('-')[1]
                             ValidCharacters = $ChildNoteArray[3]
@@ -166,7 +179,7 @@ Param ()
                         [PSCustomObject]@{
                             Header          = $header
                             Entity          = $ChildNoteArray[0]
-                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' ,'/'
+                            NameSpace       = "{0}/{1}" -f $header, $ChildNoteArray[0] -replace ' / ' , '/'
                             Scope           = $ChildNoteArray[1]
                             MinLength       = $ChildNoteArray[2].Split('-')[0]
                             MaxLength       = $ChildNoteArray[2].Split('-')[1]
@@ -228,5 +241,8 @@ Param ()
 }
 
 $Restrictions = Get-AzNamingRestrictions
-# Write-Output $Restrictions
-Push-OutputBinding -Name outputBlob -Value $Restrictions
+# Write to the Azure Functions log stream.
+$Message = "Run the function" 
+Write-Host $Message
+Write-Output $Restrictions
+Push-OutputBinding -Name outputBlob -Value $Restrictions 
