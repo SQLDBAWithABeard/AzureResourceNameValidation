@@ -1,8 +1,12 @@
 # Validate Azure Name is correct
 
+Ever need to know if the name that you are generating for your Azure Resources is correct? I did so I built this API running as an Azure Function to do so.
+
+(Actually, I built a couple of functions and a Pester test in the beginning but I have converted it to this :-) )
+
 Thanks to Barbara Forbes https://4bes.nl/  @Ba4bes for the inspiration https://4bes.nl/2021/10/24/api-to-collect-azure-resource-abbreviations/
 
-The Collect-NamingRestrictions Function will gather the information every day from the https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules web-page, parse it and store it in a storage account ready to be used by  
+The Collect-NamingRestrictions Function will gather the information every day from the https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules web-page, parse it (sort of, hopefully) and store it in a storage account ready to be used by  
 
 The AzureNameValidation function which takes a `Name` and a `NameSpace` parameter and validates against Max and Min length of the restrictions (at present) and provides a pass or fail response  
 
